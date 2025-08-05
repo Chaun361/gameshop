@@ -1,0 +1,61 @@
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "inputUsername" : "testname2",
+    "inputPassword" : "testpasswords"
+}
+
+###
+
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+    "inputUsername" : "testname4",
+    "inputPassword" : "testpasswords"
+}
+
+###
+
+POST http://localhost:3000/logout
+
+###
+
+GET http://localhost:3000/token
+
+###
+
+GET http://localhost:3000/products
+
+###
+
+POST http://localhost:3000/add
+Content-Type: application/json
+
+{
+    "user_id" : "1",
+    "product_id" : "2",
+    "quantity": 1
+}
+###
+
+POST http://localhost:3000/decrease
+Content-Type: application/json
+
+{
+    "user_id" : "1",
+    "product_id" : "1",
+    "quantity": 2
+}
+
+###
+
+POST http://localhost:3000/setcart
+Content-Type: application/json
+
+{
+    "user_id" : "1",
+    "product_id" : "1",
+    "quantity": 1
+}
