@@ -6,7 +6,7 @@ dotenv.config();
 
 const handleRegister = async (req, res) => {
     const { inputUsername, inputPassword } = req.body;
-    if (!inputUsername || !inputPassword) return res.status(400).json({ err: "Invalid request" });
+    if (!inputUsername || !inputPassword) return res.status(400).json({ message: "Invalid request" });
 
     const client = await pool.connect();
     try {
@@ -14,7 +14,7 @@ const handleRegister = async (req, res) => {
             'SELECT * FROM Users WHERE username = $1',
             [inputUsername]
         );
-        if (checkDuplicateUsername?.rows[0]) return res.status(409).json({ err: "Username already taken" });
+        if (checkDuplicateUsername?.rows[0]) return res.status(409).json({ message: "Username already taken" });
         console.log(checkDuplicateUsername?.rows[0]);
         //hash password
         const saltRounds = 10
@@ -30,7 +30,7 @@ const handleRegister = async (req, res) => {
     }
     catch (err) {
         console.error(err);
-        res.status(500).json({ err: 'Server error during register' });
+        res.status(500).json({ message: 'Server error during register' });
     }
     finally {
         client.release();

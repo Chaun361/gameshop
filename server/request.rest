@@ -12,8 +12,8 @@ POST http://localhost:3000/register
 Content-Type: application/json
 
 {
-    "inputUsername" : "testname4",
-    "inputPassword" : "testpasswords"
+    "inputUsername" : "shane",
+    "inputPassword" : "123"
 }
 
 ###

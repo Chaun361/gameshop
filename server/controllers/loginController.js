@@ -8,7 +8,7 @@ dotenv.config();
 const handleLogin = async (req, res) => {
     const { inputUsername, inputPassword } = req.body;
 
-    if (!inputUsername || !inputPassword) return res.status(400).json({ error: "Invalid request" });
+    if (!inputUsername || !inputPassword) return res.status(400).json({ message: "Invalid request" });
 
     const client = await pool.connect();
     try {
@@ -19,11 +19,11 @@ const handleLogin = async (req, res) => {
         );
 
         const foundUser = databaseResult.rows[0]
-        if (!foundUser) return res.status(404).json({ err: 'User not found.' });
+        if (!foundUser) return res.status(404).json({ message: 'User not found.' });
 
         const storedHashPassword = foundUser.password_hash;
         const isPwdMatch = await bcrypt.compare(inputPassword, storedHashPassword);
-        if (!isPwdMatch) return res.status(401).json({ err: "Invalid password" });
+        if (!isPwdMatch) return res.status(401).json({ message: "Invalid password" });
 
         //create JWT
         const accessToken = jwt.sign(
@@ -59,7 +59,7 @@ const handleLogin = async (req, res) => {
     }
     catch (err) {
         console.err(err);
-        return res.json({ err: "server error during login" });
+        return res.json({ message: "server error during login" });
     }
     finally {
         client.release();

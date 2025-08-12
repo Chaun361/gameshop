@@ -1,8 +1,32 @@
-import { useState } from "react";
+import { useState , useEffect , useContext } from "react";
+import axios from '../api/axios';
+import AuthContext from "../context/AuthProvider";
+import { useNavigate , Link } from "react-router-dom";
 
 const Home = () => {
-
+    const [products , setProducts] = useState([]);
     const [isMenuOpen , setIsMenuOpen] = useState(false);
+
+    const {auth} = useContext(AuthContext);
+
+    useEffect( () => {
+        const fetchProducts = async () => {
+            try {
+                const response = await axios.get('/products');
+                const data = response.data.products;
+                setProducts(data);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        };
+
+        const fetchCart = async () => {
+            
+        }
+
+        fetchProducts();
+    } , []);
 
     const toggleMenu = () => {
         setIsMenuOpen(p => !p);
@@ -24,8 +48,27 @@ const Home = () => {
                     </div>
 
                     <div className="flex justify-between gap-6 items-center">
-                        <h1>cart</h1>
-                        <button className="hidden md:flex">Sign In</button>
+
+                        <div className="flex gap-2">
+                            <Link to="/yourcart">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                            </Link>
+                            { auth?.accessToken && <span>0</span>}
+                        </div>
+                        
+                        {auth?.accessToken && <h1>My Account</h1>}
+
+                        {auth?.accessToken ? 
+                            <button className="hidden md:flex">Sign Out</button>
+                            :
+                            <button className="hidden md:flex">Sign In</button>
+                        }
+                        
+                        
                         {/* Menu button */}
                         <div className="md:hidden">
                             <button id='menu-toggle' className="text-indigo-950" onClick={toggleMenu}>
@@ -69,6 +112,19 @@ const Home = () => {
                     null
                 }
             </nav>
+            <main>
+                <h1>Products</h1>
+                <ul>
+                    {products.map((product) => 
+                        <li id={product.product_id} key={product.product_id}>
+                            <h2>{product.name}</h2>
+                            <h2>{product.price}</h2>
+                            <h3>Stock: x{product.stock_quantity}</h3>
+                            <button>Add to cart</button>
+                        </li>
+                    )}
+                </ul>
+            </main>
         </>
     );
 }

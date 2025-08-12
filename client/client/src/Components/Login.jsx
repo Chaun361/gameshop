@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState , useContext } from "react";
 import {Link , useNavigate} from 'react-router-dom'
 import axios from '../api/axios';
+import AuthContext from "../context/AuthProvider";
 
 const Login = () => {
     const [ username , setUsername] = useState("");
     const [password , setPassword] = useState('')
+
+    const {auth , setAuth} = useContext(AuthContext);
 
     const userRef = useRef();
     const errRef = useRef();
@@ -19,8 +22,12 @@ const Login = () => {
     } , []);
 
     useEffect(() => {
+        if (errMsg) errRef.current.focus();
+    } , [errMsg]);
+
+    useEffect(() => {
         setErrMsg('');
-    } , [username]);
+    } , [username , password]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,19 +48,22 @@ const Login = () => {
             const accessToken = response.data.accessToken;
             setUsername('');
             setPassword('');
+            setAuth({accessToken : accessToken , username: username});
             setSuccess(true);
             navigate('/' , {replace : true});
             
         }   
         catch (err) {
-            if (!err?.response) setErrMsg('No server response.');
-            console.log(err);
+            const message = err?.response?.data?.message;
+            setErrMsg(message);
+            console.log(message);
         }
     }
 
     return(
         <section>
             <h1>Login</h1>
+            {errMsg ? <span ref={errRef}>{errMsg}</span> : <></>}
             <form onSubmit={handleSubmit}>
                 <label htmlFor="username">Username: </label>
                 <input 
