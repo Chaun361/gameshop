@@ -17,10 +17,17 @@ client.connect().catch(err => {
 });
 
 const updatedCart = async (req, res) => {
-    const { user_id } = req.body;
+    let user_id;
+    if (req?.query?.user_id) {
+        user_id = req.query.user_id;
+    }
+    else {
+        user_id = req.body.user_id
+    }
+
     try {
         const cartQuery = await client.query(
-            'SELECT * FROM CartItems WHERE user_id = $1',
+            'SELECT c.cart_item_id, c.product_id, p.name, p.price, c.quantity FROM cartitems c LEFT JOIN products p ON c.product_id = p.product_id WHERE c.user_id = $1',
             [user_id]
         );
         return res.status(200).json({ successMessage: res.successMessage, updatedCart: cartQuery.rows })

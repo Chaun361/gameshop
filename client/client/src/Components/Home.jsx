@@ -3,11 +3,16 @@ import axios from '../api/axios';
 import AuthContext from "../context/AuthProvider";
 import { useNavigate , Link } from "react-router-dom";
 
+import { handleLogout } from "../utils/HandleLogout";
+
 const Home = () => {
     const [products , setProducts] = useState([]);
     const [isMenuOpen , setIsMenuOpen] = useState(false);
+    const [cartQuantity , setCartQuantity] = useState(0); 
+    
+    const {auth , setAuth} = useContext(AuthContext);
 
-    const {auth} = useContext(AuthContext);
+    const navigate = useNavigate();
 
     useEffect( () => {
         const fetchProducts = async () => {
@@ -22,14 +27,70 @@ const Home = () => {
         };
 
         const fetchCart = async () => {
-            
-        }
+            if (!auth?.accessToken) return;
 
+            try {
+                const response = await axios.get(
+                `/fetchcart?user_id=${auth.user_id}`,
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
+
+                const userCart = response.data.updatedCart;
+                let totalQuantity = 0;
+                userCart.map(item => totalQuantity += item.quantity);
+                setCartQuantity(totalQuantity);
+
+            } catch (err) {
+                console.error(err);
+            }
+            
+        };
+
+        fetchCart();
         fetchProducts();
+        console.log(auth?.accessToken);
     } , []);
 
     const toggleMenu = () => {
         setIsMenuOpen(p => !p);
+    }
+
+    const handleAddCart = async (product_id) => {
+        if (!auth?.accessToken) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                '/add',
+                { 
+                    "user_id" : auth.user_id ,
+                    "product_id" : product_id,
+                    "quantity": 1
+                },
+                    
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                }
+            );
+
+            const userCart = response.data.updatedCart;
+            let totalQuantity = 0;
+            userCart.map(item => totalQuantity += item.quantity);
+            setCartQuantity(totalQuantity);
+
+        } catch (err) {
+            console.err(err);
+        }
+        
+    }
+
+    const logoutHandler = async () => {
+        await handleLogout(setAuth);
     }
     
     return(
@@ -57,15 +118,15 @@ const Home = () => {
                                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                                 </svg>
                             </Link>
-                            { auth?.accessToken && <span>0</span>}
+                            { auth?.accessToken && <span>{cartQuantity}</span>}
                         </div>
                         
                         {auth?.accessToken && <h1>My Account</h1>}
 
                         {auth?.accessToken ? 
-                            <button className="hidden md:flex">Sign Out</button>
+                            <button className="hidden md:flex hover:cursor-pointer" onClick={logoutHandler}>Sign Out</button>
                             :
-                            <button className="hidden md:flex">Sign In</button>
+                            <Link to="/login"><button className="hidden md:flex hover:cursor-pointer">Sign In</button></Link>
                         }
                         
                         
@@ -105,7 +166,16 @@ const Home = () => {
                             <li><a href="#" className="font-bold text-xl text-indigo-950">Home</a></li>
                             <li><a href="#" className="font-bold text-xl text-indigo-950">Shop</a></li>
                             <li><a href="#" className="font-bold text-xl text-indigo-950">Contact Us</a></li>
-                            <li><a href="#" className="font-bold text-xl text-indigo-950">Sign In</a></li>
+                            { auth?.accessToken ? (
+                                <>
+                                    <li><a href="#" className="font-bold text-xl text-indigo-950">My Account</a></li>
+                                    <li><a href="#" onClick={logoutHandler} className="font-bold text-xl text-indigo-950">Sign Out</a></li>
+                                </>
+                            )   : (
+                                <Link to="/login">
+                                    <li><h2 className="font-bold text-xl text-indigo-950">Sign In</h2></li>
+                                </Link>
+                            )}
                         </ul>
                     </div>
                     :
@@ -120,7 +190,12 @@ const Home = () => {
                             <h2>{product.name}</h2>
                             <h2>{product.price}</h2>
                             <h3>Stock: x{product.stock_quantity}</h3>
-                            <button>Add to cart</button>
+                            <button
+                                onClick={() => handleAddCart(product.product_id)}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
+                            >
+                                Add to cart
+                            </button>
                         </li>
                     )}
                 </ul>

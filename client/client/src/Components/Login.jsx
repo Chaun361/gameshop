@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState , useContext } from "react";
-import {Link , useNavigate} from 'react-router-dom'
+import {Link , useLocation, useNavigate} from 'react-router-dom'
 import axios from '../api/axios';
 import AuthContext from "../context/AuthProvider";
 
@@ -7,12 +7,14 @@ const Login = () => {
     const [ username , setUsername] = useState("");
     const [password , setPassword] = useState('')
 
-    const {auth , setAuth} = useContext(AuthContext);
+    const {setAuth , persist , setPersist} = useContext(AuthContext);
 
     const userRef = useRef();
     const errRef = useRef();
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
 
     const [errMsg , setErrMsg] = useState('');
     const [success , setSuccess] = useState(false);
@@ -20,6 +22,10 @@ const Login = () => {
     useEffect(() => {
         userRef.current.focus();
     } , []);
+
+    useEffect(() => {
+        localStorage.setItem("persist" , persist);
+    } , [persist]);
 
     useEffect(() => {
         if (errMsg) errRef.current.focus();
@@ -46,11 +52,13 @@ const Login = () => {
             );
 
             const accessToken = response.data.accessToken;
+            const user_id = response.data.id;
+        
             setUsername('');
             setPassword('');
-            setAuth({accessToken : accessToken , username: username});
+            setAuth({accessToken : accessToken , username: username , user_id:user_id });
             setSuccess(true);
-            navigate('/' , {replace : true});
+            navigate(from , {replace : true});
             
         }   
         catch (err) {
@@ -58,6 +66,10 @@ const Login = () => {
             setErrMsg(message);
             console.log(message);
         }
+    }
+
+    const togglePersist = () => {
+        setPersist(p => !p);
     }
 
     return(
@@ -84,6 +96,13 @@ const Login = () => {
                     onChange={e => setPassword(e.target.value)}
                     required
                 />
+                <input 
+                    type="checkbox"
+                    id="persist"
+                    onChange={togglePersist}
+                    checked={persist} 
+                />
+                <label htmlFor="persist">Trust this device</label>
                 <button>Sign In</button>
             </form>
             <p>Need account?</p>

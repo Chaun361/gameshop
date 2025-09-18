@@ -2,8 +2,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-    "inputUsername" : "testname2",
-    "inputPassword" : "testpasswords"
+    "inputUsername" : "shane",
+    "inputPassword" : "123"
 }
 
 ###
@@ -34,8 +34,8 @@ POST http://localhost:3000/add
 Content-Type: application/json
 
 {
-    "user_id" : "1",
-    "product_id" : "2",
+    "user_id" : "3",
+    "product_id" : "1",
     "quantity": 1
 }
 ###
@@ -44,7 +44,7 @@ POST http://localhost:3000/decrease
 Content-Type: application/json
 
 {
-    "user_id" : "1",
+    "user_id" : "3",
     "product_id" : "1",
     "quantity": 2
 }
@@ -55,7 +55,16 @@ POST http://localhost:3000/setcart
 Content-Type: application/json
 
 {
-    "user_id" : "1",
+    "user_id" : "3",
     "product_id" : "1",
     "quantity": 1
+}
+
+###
+
+GET http://localhost:3000/fetchcart
+Content-Type: application/json
+
+{
+    "user_id" : 3
 }

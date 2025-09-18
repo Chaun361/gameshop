@@ -6,6 +6,7 @@ import cors from 'cors';
 import corsOption from './config/corsOptions.js';
 import loginRouter from './routes/login.js';
 import registerRouter from './routes/register.js';
+import fetchCartRouter from './routes/fetchCart.js';
 
 import cookieParser from 'cookie-parser';
 import logger from './middlewares/logger.js';
@@ -43,5 +44,7 @@ app.use('/add', addProductRouter);
 app.use('/decrease', decreaseProductRouter);
 
 app.use('/setcart', setCartRoute);
+
+app.use('/fetchcart' , fetchCartRouter);
 
 app.listen(3000, () => console.log("server running on port 3000"));

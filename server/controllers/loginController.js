@@ -20,6 +20,7 @@ const handleLogin = async (req, res) => {
 
         const foundUser = databaseResult.rows[0]
         if (!foundUser) return res.status(404).json({ message: 'User not found.' });
+        console.log(foundUser);
 
         const storedHashPassword = foundUser.password_hash;
         const isPwdMatch = await bcrypt.compare(inputPassword, storedHashPassword);
@@ -28,17 +29,19 @@ const handleLogin = async (req, res) => {
         //create JWT
         const accessToken = jwt.sign(
             {
-                username: foundUser.username
+                username: foundUser.username ,
+                id: foundUser.user_id
             },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: '15s' }
         );
         const refreshToken = jwt.sign(
             {
-                username: foundUser.username
+                username: foundUser.username,
+                id: foundUser.user_id
             },
             process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: '35s' }
+            { expiresIn: '600 s' }
         );
 
         //save refresh token to DB and cookie 
@@ -50,11 +53,11 @@ const handleLogin = async (req, res) => {
 
         res.cookie('jwt', refreshToken, {
             httpOnly: true,
-            secure: true,       // Required if sameSite: 'none'
-            sameSite: 'none',   // Allows cross-domain cookie clearing
+            secure: false,       // Required if sameSite: 'none'
+            sameSite: 'lax',   // Allows cross-domain cookie clearing
             maxAge: 24 * 60 * 60 * 1000
         });
-        return res.json({ accessToken: accessToken });
+        return res.json({ accessToken: accessToken , id: foundUser.user_id });
 
     }
     catch (err) {

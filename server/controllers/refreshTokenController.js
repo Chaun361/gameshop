@@ -7,10 +7,11 @@ dotenv.config();
 
 const handleRefreshToken = async (req, res) => {
     const cookies = req.cookies;
+
     if (!cookies?.jwt) return res.status(400).json({ err: 'Invalid request' });
     const refreshToken = cookies.jwt;
-
     const client = await pool.connect();
+
     try {
         //validate refreshToken
         const foundUser = await client.query(
@@ -28,13 +29,14 @@ const handleRefreshToken = async (req, res) => {
 
             const accessToken = jwt.sign(
                 {
-                    username: encoded.username
+                    username: encoded.username,
+                    id: encoded.id
                 },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '15s' }
             );
 
-            return res.json({ accessToken: accessToken, username: encoded.username });
+            return res.json({ accessToken: accessToken, username: encoded.username , id: encoded.id });
 
         })
 
